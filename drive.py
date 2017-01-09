@@ -11,19 +11,26 @@ from PIL import Image
 from PIL import ImageOps
 from flask import Flask, render_template
 from io import BytesIO
+import cv2
 
 from keras.models import model_from_json
-from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array
+from keras.preprocessing.image import img_to_array
 
-# Fix error with Keras and TensorFlow
 import tensorflow as tf
-tf.python.control_flow_ops = tf
+from tensorflow.python.ops import control_flow_ops
+tf.python.control_flow_ops = control_flow_ops
 
 
 sio = socketio.Server()
 app = Flask(__name__)
 model = None
-prev_image_array = None
+
+def roi(img): # For model 5
+    img = img[60:140,40:280]
+    return cv2.resize(img, (200, 66))
+
+def preprocess_input(img):
+    return roi(cv2.cvtColor(img, cv2.COLOR_RGB2YUV))
 
 @sio.on('telemetry')
 def telemetry(sid, data):
@@ -36,12 +43,36 @@ def telemetry(sid, data):
     # The current image from the center camera of the car
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
-    image_array = np.asarray(image)
+
+    # model >= 5
+    x = np.asarray(image, dtype=np.float32)
+    image_array = preprocess_input(x)
     transformed_image_array = image_array[None, :, :, :]
-    # This model currently assumes that the features of the model are just the images. Feel free to change this.
+
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
-    # The driving model currently just outputs a constant throttle. Feel free to edit this.
-    throttle = 0.2
+
+    speed = float(speed)
+
+    throttle_max = 1.0
+    throttle_min = -1.0
+    steering_threshold = 3./25
+
+    # Targets for speed controller
+    nominal_set_speed = 20
+    steering_set_speed = 20
+
+    K = 0.35   # Proportional gain
+
+    # Slow down for turns
+    if abs(steering_angle) > steering_threshold:
+        set_speed = steering_set_speed
+    else:
+        set_speed = nominal_set_speed
+
+    throttle = (set_speed - speed)*K
+    throttle = min(throttle_max, throttle)
+    throttle = max(throttle_min, throttle)
+    # else don't change from previous
     print(steering_angle, throttle)
     send_control(steering_angle, throttle)
 
@@ -65,7 +96,9 @@ if __name__ == '__main__':
     help='Path to model definition json. Model weights should be on the same path.')
     args = parser.parse_args()
     with open(args.model, 'r') as jfile:
-        model = model_from_json(jfile.read())
+        # model = model_from_json(json.load(jfile))
+        # model = model_from_json(jfile.read())
+        model = model_from_json(json.loads(jfile.read()))
 
     model.compile("adam", "mse")
     weights_file = args.model.replace('json', 'h5')
