@@ -50,9 +50,9 @@ Reason: The left and right images are already being taken into consideration so 
 Not sure if this will help. Ignoring it for now. Will revisit later if needed.
 
 #### Data Transformation
-Perform RGB -> YUV transformation.  
-Choose a particular Region of Interest from each image.
-Resize the image to 66x200 to adapt to NVIDIA Network Architecture
+- Perform RGB -> YUV transformation.  
+- Choose a particular Region of Interest from each image.  
+- Resize the image to 66x200 to adapt to NVIDIA Network Architecture.  
 
 
 ### Model
@@ -73,7 +73,7 @@ https://arxiv.org/abs/1604.07316
 </table>
 
 #### Model Saving
-Save the model as model.json file
+Save the model as model.json file  
 Save the model weights as model.h5 file
 
 #### Autonomous Car Simulation
