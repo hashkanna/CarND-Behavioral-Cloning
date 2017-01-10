@@ -25,10 +25,12 @@ sio = socketio.Server()
 app = Flask(__name__)
 model = None
 
-def roi(img): # For model 5
+# Narrow down the Region of Interest
+def roi(img):
     img = img[60:140,40:280]
     return cv2.resize(img, (200, 66))
 
+# Convert RGB to YUV
 def preprocess_input(img):
     return roi(cv2.cvtColor(img, cv2.COLOR_RGB2YUV))
 
@@ -44,7 +46,6 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
 
-    # model >= 5
     x = np.asarray(image, dtype=np.float32)
     image_array = preprocess_input(x)
     transformed_image_array = image_array[None, :, :, :]
