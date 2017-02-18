@@ -81,3 +81,34 @@ Execute the saved model as ```python drive.py model.json``` to simulate the auto
 
 #### Results
 [![Autonomous Mode](https://img.youtube.com/vi/McJNE4yghC0/0.jpg)](https://www.youtube.com/watch?v=McJNE4yghC0)
+
+---
+
+### Discussion
+
+Tried out transfer learning of some of the architectures like AlexNet and VGG by removing the last layer and replacing with fully connected layer. The vehicle was not driving as well as required and it was a bit more time consuming than the NVIDIA architecture chosen in this project.
+
+##### Model Architecture Design
+The Model Architecture of NVIDIA End-to-End deep learning is simple and has only a few layers. The network has 9 layers. The first layer is a normalization layer. The next 5 layers are convolutional layers which are meant for feature extraction from the normalized images. They are followed by 3 fully connected layers.
+
+###### Normalization Layer
+This is a single static layer which performs image normalization on the input image
+
+###### Convolutional Layer
+* There are 5 convolutional layers that were identified by the NVIDIA engineers through empirical means through various experiments with different layer configurations.
+* The first 3 layers have a stride length of 2x2 and a kernel size of 5x5
+* The remaining 2 convolutional layers are non-strided with a kernel size of 3x3
+
+###### Fully Connected Layer
+There are 3 fully connected layers which result in a value that is the inverse turning radius.
+
+###### No Drop-Out Layer
+A Drop-Out layer is primarily used to take care of aggressive overfitting and make the network more resilient and generic to handle new and different use cases, in this case, new angles or new road conditions, etc. However, not much over-fitting has been observed as seen from the results of the experiments. Hence, there is not much of a need to make use of the Drop-Out layers in this network.
+
+##### Architecture Characteristics
+
+##### Data Preprocessing
+The quality of data provided by Udacity is pretty good. Augmentation of the data has been performed using the steps mentioned in the link http://machinelearningmastery.com/image-augmentation-deep-learning-keras/ and explained in the previous sections.
+
+##### Model Training (Include hyperparameter tuning.)
+Training of the model has been performed on a AWS g2.2xlarge GPU instance. The model is run using the Keras deep learning package. Details of the training are available in the [model.ipynb](./model.ipynb) file.
