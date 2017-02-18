@@ -98,6 +98,7 @@ This is a single static layer which performs image normalization on the input im
 * There are 5 convolutional layers that were identified by the NVIDIA engineers through empirical means through various experiments with different layer configurations.
 * The first 3 layers have a stride length of 2x2 and a kernel size of 5x5
 * The remaining 2 convolutional layers are non-strided with a kernel size of 3x3
+* All the layers have a Rectified Linear Unit ReLU non-linear activation
 
 ###### Fully Connected Layer
 There are 3 fully connected layers which result in a value that is the inverse turning radius.
@@ -106,9 +107,10 @@ There are 3 fully connected layers which result in a value that is the inverse t
 A Drop-Out layer is primarily used to take care of aggressive overfitting and make the network more resilient and generic to handle new and different use cases, in this case, new angles or new road conditions, etc. However, not much over-fitting has been observed as seen from the results of the experiments. Hence, there is not much of a need to make use of the Drop-Out layers in this network.
 
 ##### Architecture Characteristics
+Some of the good characteristics of this architecture is that it is quite small with few layers and therefore has a lower processing latency. Lack of a drop-out layer in this architecture did not have an adverse effect in the results for this domain. The system is trained end-to-end, so it could be difficult to understand or debug theoretically as to which layers, convolutional or fully connected, are responsible for the various outputs from the network. The network has about 27 million connections and about 250,000 parameters.
 
 ##### Data Preprocessing
-The quality of data provided by Udacity is pretty good. Augmentation of the data has been performed using the steps mentioned in the link http://machinelearningmastery.com/image-augmentation-deep-learning-keras/ and explained in the previous sections.
+The quality of data provided by Udacity is quite useful. The images have been resized to 200x66, converted from RGB to YUV and are trained in batches. Augmentation of the data has been performed using the steps mentioned in the link http://machinelearningmastery.com/image-augmentation-deep-learning-keras/ and explained in the previous sections.
 
 ##### Model Training (Include hyperparameter tuning.)
-Training of the model has been performed on a AWS g2.2xlarge GPU instance. The model is run using the Keras deep learning package. Details of the training are available in the [model.ipynb](./model.ipynb) file.
+Training of the model has been performed on a AWS g2.2xlarge GPU instance. The model is run using the Keras deep learning package. Details of the training are available in the [model.ipynb](./model.ipynb) file. Images are trained in batches of 32. Adam Optimizer has been used with a learning rate of 0.0001 after experimenting with a few other values like 0.1, 0.01 and 0.001. Ideally, a grid search on hyperparameters can be performed to identify optimal values for better performance. The training happens via multiple epochs with each epoch having about 10000 samples for training. The data has been divided into training and test sets with a 75:25 ratio after shuffling the entire dataset.
