@@ -61,15 +61,16 @@ Use the End-to-End Deep Learning Model for Self Driving Cars by NVIDIA
 https://arxiv.org/abs/1604.07316  
 <br><img src="https://devblogs.nvidia.com/parallelforall/wp-content/uploads/2016/08/cnn-architecture.png" width=300 height=400></br>  
 
+This architecture has been modified to include Dropout layers interspersed between each of the four fully connected layers to handle overfitting.
 
 #### Model Parameters
 <table>
 <tr><td>Number of Epochs</td><td>2</td></tr>
-<tr><td>Samples per Epoch</td><td>10,000</td></tr>  
+<tr><td>Samples per Epoch</td><td>28,000</td></tr>  
 <tr><td>Validation samples at the end of each epoch</td><td>960</td></tr>
 <tr><td>Optimizer</td><td>Adam (0.0001)</td></tr>
 <tr><td>Loss Function</td><td>Mean Squared Error (MSE)</td></tr>
-<tr><td>Train-Validation Split Ratio</td><td>75:25</td></tr>
+<tr><td>Train-Validation Split Ratio</td><td>90:10</td></tr>
 </table>
 
 #### Model Saving
@@ -101,16 +102,17 @@ This is a single static layer which performs image normalization on the input im
 * All the layers have a Rectified Linear Unit ReLU non-linear activation
 
 ###### Fully Connected Layer
-There are 3 fully connected layers which result in a value that is the inverse turning radius.
+* There are 4 fully connected layers which result in a value that is the inverse turning radius.
+* All the 4 layers have a Rectified Linear Unit ReLU non-linear activation
 
-###### No Drop-Out Layer
-A Drop-Out layer is primarily used to take care of aggressive overfitting and make the network more resilient and generic to handle new and different use cases, in this case, new angles or new road conditions, etc. However, not much over-fitting has been observed as seen from the results of the experiments. Hence, there is not much of a need to make use of the Drop-Out layers in this network.
+###### Dropout Layer
+A Dropout layer has been added to take care of overfitting and make the network a bit more resilient. A Dropout of 0.25 has been interspersed between each of the four fully connected layers.
 
 ##### Architecture Characteristics
-Some of the good characteristics of this architecture is that it is quite small with few layers and therefore has a lower processing latency. Lack of a drop-out layer in this architecture did not have an adverse effect in the results for this domain. The system is trained end-to-end, so it could be difficult to understand or debug theoretically as to which layers, convolutional or fully connected, are responsible for the various outputs from the network. The network has about 27 million connections and about 250,000 parameters.
+Some of the good characteristics of this architecture is that it is quite small with few layers and therefore has a lower processing latency. The system is trained end-to-end, so it could be difficult to understand or debug theoretically as to which layers, convolutional or fully connected, are responsible for the various outputs from the network.
 
 ##### Data Preprocessing
 The quality of data provided by Udacity is quite useful. The images have been resized to 200x66, converted from RGB to YUV and are trained in batches. Augmentation of the data has been performed using the steps mentioned in the link http://machinelearningmastery.com/image-augmentation-deep-learning-keras/ and explained in the previous sections.
 
 ##### Model Training (Include hyperparameter tuning.)
-Training of the model has been performed on a AWS g2.2xlarge GPU instance. The model is run using the Keras deep learning package. Details of the training are available in the [model.ipynb](./model.ipynb) file. Images are trained in batches of 32. Adam Optimizer has been used with a learning rate of 0.0001 after experimenting with a few other values like 0.1, 0.01 and 0.001. Ideally, a grid search on hyperparameters can be performed to identify optimal values for better performance. The training happens via multiple epochs with each epoch having about 10000 samples for training. The data has been divided into training and test sets with a 75:25 ratio after shuffling the entire dataset.
+Training of the model has been performed on a AWS g2.2xlarge GPU instance. The model is run using the Keras deep learning package. Details of the training are available in [model.ipynb](./model.ipynb) file. Images are trained in batches of 32. Adam Optimizer has been used with a learning rate of 0.0001 after experimenting with a few other values like 0.1, 0.01 and 0.001. Ideally, a grid search on hyperparameters can be performed to identify optimal values for better performance. The training happens via multiple epochs with each epoch having about 28000 samples for training. The data has been divided into training and test sets with a 90:10 ratio after shuffling the entire dataset.
